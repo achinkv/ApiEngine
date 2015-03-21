@@ -1,0 +1,30 @@
+{
+            "commands": [{
+                "what": "OneApiService",
+                "handler": "step1",
+                "apiinfo": {
+                    "oa": {
+                        "oauth2": "true",
+                        "requesttokenurl": "https://www.facebook.com/v2.2/dialog/oauth",
+                        "oauthurl": "https://graph.facebook.com/oauth/access_token",
+                        "key1": "xxxxxxxxxxxxxxx",
+                        "key2": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                        "version": "2.0",
+                        "callbackurl": "http://localhost:3000/",
+                        "encoding": "HMAC-SHA1",
+                        "oauth_verifier": "<%= oauth_verifier %>",
+                        "finalurl": "https://graph.facebook.com/v2.2/me/photos",
+                        "finalurlmethod": "POST",
+                        "finalurldata": {
+                            "message": "friends, what's going on",
+                            "url":"https://farm6.staticflickr.com/5598/15489192032_d5780bca4f_h.jpg"
+                            //"source":encodedimagestring
+                        },
+                        "parameters": {
+                            "redirect_uri": "http://localhost:3000/",
+                            "scope": "publish_actions,user_photos" //for more than one permissions comma separated permission names  can can be passed against scope.
+                        }
+                    }
+                }
+            }]
+        }

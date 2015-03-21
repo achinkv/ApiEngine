@@ -1,0 +1,21 @@
+{
+    "commands": [{
+        "what": "OneApiService",
+        "handler": "step1",
+        "apiinfo": {
+            "oa": {
+                "oauthurl": "https://api.linkedin.com/uas/oauth/accessToken",
+                "requesttokenurl": "https://api.linkedin.com/uas/oauth/requestToken",
+                "key1": "xxxxxxxxxxxxxxx",
+                "key2": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                "version": "1.0",
+                "callbackurl": "http://localhost:3000/",
+                "encoding": "HMAC-SHA1",
+                "oauth_verifier_url": "https://www.linkedin.com/uas/oauth/authorize?oauth_token=",
+                "oauth_verifier": "<%= oauth_verifier %>",
+                "finalurl": "https://api.linkedin.com/v1/people-search?first-name=Saurabh&last-name=Sharma",
+                "finalurlmethod": "GET"
+            }
+        }
+    }]
+}

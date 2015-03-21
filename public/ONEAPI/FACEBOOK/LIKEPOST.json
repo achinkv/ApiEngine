@@ -1,0 +1,26 @@
+{
+            "commands": [{
+                "what": "OneApiService",
+                "handler": "step1",
+                "apiinfo": {
+                    "oa": {
+                        "oauth2": "true",
+                        "requesttokenurl": "https://www.facebook.com/v2.2/dialog/oauth",
+                        "oauthurl": "https://graph.facebook.com/oauth/access_token",
+                        "key1": "xxxxxxxxxxxxxxx",
+                        "key2": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                        "version": "2.0",
+                        "callbackurl": "http://localhost:3000/",
+                        "encoding": "HMAC-SHA1",
+                        "oauth_verifier": "<%= oauth_verifier %>",
+                        "finalurl": "https://graph.facebook.com/v2.2/100007404526207_1567930226797113/likes",
+                        "finalurlmethod": "POST",
+                        "finalurldata": {},
+                        "parameters": {
+                            "redirect_uri": "http://localhost:3000/",
+                            "scope": "publish_actions" //for more than one permissions comma separated permission names  can can be passed against scope.
+                        }
+                    }
+                }
+            }]
+        }
