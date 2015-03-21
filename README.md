@@ -12,6 +12,8 @@ npm install oauth.
 
 ABOUT THE STRUCTURE:
 
+```javascript
+
 {
     "commands": [{
         "what": "OneApiService",
@@ -40,7 +42,7 @@ ABOUT THE STRUCTURE:
         }
     }]
 }
-
+```
 
 **The put method on /fyler route in router.js handles the abovementioned structure.It expect a json.**
 
