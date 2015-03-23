@@ -29,12 +29,12 @@ function preparerequest(reqobj) { //this function just converts the object passe
 
 
 var OneApiService = function() {
-    
+
 
     // step 1 handler
 
     var step1 = function step1(params, cb) {
-        
+
         globaljson = params['apiinfo'];
         if (params && params.apiinfo && params.apiinfo.oa && params.apiinfo.oa.oauth2diff === "true") {
             // This if condition deals with a different flow of oauth2.
@@ -96,7 +96,7 @@ var OneApiService = function() {
                 step2(params, cb);
             } else {
 
-                 
+
 
                 var list = [];
 
@@ -107,7 +107,7 @@ var OneApiService = function() {
                     querystring.escape(globaljson.oa.url2)
                 ];
 
-            
+
                 console.log(globaljson);
                 //var oa = new OAuth(globaljson.oa.requesttokenurl + "?scope=" + gdataScopes.join('+'),
                 var oa = new OAuth(globaljson.oa.requesttokenurl,
@@ -131,7 +131,7 @@ var OneApiService = function() {
 
                         // redirect the user to authorize the token
                         list.push(globaljson.oa.oauth_verifier_url + oauth_token);
-                        console.log('cb',error,list);
+                        console.log('cb', error, list);
                         cb(error, list);
                     }
                 });
@@ -181,7 +181,7 @@ var OneApiService = function() {
 
                 } else if (globaljson.oa.finalurlmethod === "POST") { //final request if the method for the final request is post.
 
-                    var finalrequestparams = globaljson.oa.finalurldata||{}; //data to be sent along the final post request.
+                    var finalrequestparams = globaljson.oa.finalurldata || {}; //data to be sent along the final post request.
 
                     finalrequestparams['access_token'] = access_token; //access_token also set in the finalrequestparams.
 
@@ -189,6 +189,24 @@ var OneApiService = function() {
                     superagent.post(globaljson.oa.finalurl + "?" + querystring.stringify(finalrequestparams))
                         .send("")
                         .end(function(err, response) {
+                            cb(err, response.text);
+                        })
+
+                } else if (globaljson.oa.finalurlmethod === "PUT") { //final request if the method for the final request is post.
+
+                    var finalrequestparams = globaljson.oa.finalurldata || {}; //data to be sent along the final post request.
+                    var finalrequestbody = globaljson.oa.finalrequestbody || "";
+                    console.log("finalrequestparams", finalrequestparams, finalrequestbody);
+                    finalrequestparams['access_token'] = access_token; //access_token also set in the finalrequestparams.
+                    var contentlength = finalrequestbody.length || 0;
+                    globaljson.oa.finalrequestheaders['Content-Length'] = contentlength;
+                    //below is a superagent request for the final request to the intended api endpoint.
+                    console.log('finalrequestheaders', globaljson.oa.finalrequestheaders);
+                    superagent.put(globaljson.oa.finalurl + "?" + querystring.stringify(finalrequestparams))
+                        .set(globaljson.oa.finalrequestheaders || {})
+                        .send(finalrequestbody)
+                        .end(function(err, response) {
+                            console.log("err", err, "res", response.text);
                             cb(err, response.text);
                         })
 
