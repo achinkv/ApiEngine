@@ -3,7 +3,7 @@
         "what": "OneApiService",
         "handler": "step1",
         "apiinfo": {
-            "oa": {
+            "oa": {                
                 "oauthurl": "https://api.twitter.com/oauth/access_token",
                 "requesttokenurl": "https://api.twitter.com/oauth/request_token",
                 "key1": "xxxxxxxxxxxxxxxxxxx",

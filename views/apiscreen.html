@@ -5,7 +5,7 @@
     <title>
         API SCREEN
     </title>
-    <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+    <script src="jquery-1.10.2-min.js"></script>
     <style type="text/css">
     * {
         margin: 0;
@@ -105,10 +105,8 @@
         </div>
         <button class="btn btn-sm btn-primary" id="btnShoot" onclick="apitester()">Shoot</button>
         <button class="btn btn-sm btn-primary" id="refresh" onclick="refreshpage()">Refresh</button>
-        
         <!-- <div id="inputdiv" style="display:none"></div> -->
     </div>
-    
     <div style="inline">
         <div class="textarea">
             <label>Input for the selected api:</label>
@@ -125,9 +123,9 @@
 
     window.onload = function() {
 
-        var provider_operations;//operation provided by the api provider.
+        var provider_operations; //operation provided by the api provider.
         var chosenapijson;
-        var ajaxify = function(fileName, callback) {//function to make call on server for fetching files.
+        var ajaxify = function(fileName, callback) { //function to make call on server for fetching files.
             $.get(fileName, function(response) {
                 var responsebody = response || {};
                 provider_operations = responsebody;
@@ -135,9 +133,9 @@
             });
         };
 
-        var apiRequested = "/ONEAPI/PROVIDER_OPERATIONS.json";
+        var apiRequested = "/ONE_API/PROVIDER_OPERATIONS.json";
 
-        ajaxify(apiRequested, function(err, res) {//fetches the provide json and puts the option in a datalist.
+        ajaxify(apiRequested, function(err, res) { //fetches the provide json and puts the option in a datalist.
             var str = '';
             // debugger;
             if (res && Object.keys(res).length) {
@@ -147,7 +145,7 @@
                 document.getElementById('apis').innerHTML = str;
             }
         });
-        $("#apiname").on('blur', function() {// on blur populates the second list of api operations.
+        $("#apiname").on('blur', function() { // on blur populates the second list of api operations.
             var apiname = $("#apiname").val();
             if (apiname) {
 
@@ -164,7 +162,7 @@
 
 
 
-        function getUrlParameters(parameter, staticURL, decode) {//pulls out the needed keys and value from the query parameters in the url.
+        function getUrlParameters(parameter, staticURL, decode) { //pulls out the needed keys and value from the query parameters in the url.
 
             var currLocation = (staticURL.length) ? staticURL : window.location.search;
             if (currLocation.length > 0) {
@@ -186,7 +184,7 @@
                 }
             };
         };
-        var oauth_verifier = getUrlParameters("oauth_verifier", "", "true") || getUrlParameters("code", "", "true") || getUrlParameters("payer_id", "", "true");//extracts the oauth_verifier in case of oauth 1.0 and code in case of oauth 2.0.
+        var oauth_verifier = getUrlParameters("oauth_verifier", "", "true") || getUrlParameters("code", "", "true") || getUrlParameters("payer_id", "", "true"); //extracts the oauth_verifier in case of oauth 1.0 and code in case of oauth 2.0.
 
         console.log(oauth_verifier);
         var step2json = {
@@ -201,7 +199,7 @@
             }]
         };
 
-        if (oauth_verifier) {//call for the second step to handle the oauth flow and passes the oauth_verifier.
+        if (oauth_verifier) { //call for the second step to handle the oauth flow and passes the oauth_verifier.
             $.ajax({
                     method: "PUT",
                     url: "/fyler",
@@ -222,53 +220,59 @@
 
 
 
-    function apitester() {//brings up json applicable for the chosen api operation and then the json is sent to in the request to the server which starts the flow for consuption of the api.
+    function apitester() { //brings up json applicable for the chosen api operation and then the json is sent to in the request to the server which starts the flow for consuption of the api.
         var chosenapi;
         var apiname = $("#apiname").val();
         var operationname = $("#apiop").val();
         if (apiname && operationname) {
-            var reqUrl = "/ONEAPI/" + apiname + "/" + operationname + ".json";
+            var reqUrl = "/ONE_API/" + apiname + "/" + operationname + ".json";
+
+            /*  $.ajax({
+                    method: "GET",
+                    url: reqUrl
+                })
+                .done(function(r, success) {
+debugger;*/
 
             $.get(reqUrl, function(response) {
-                    var responsebody = response || {};
-                    chosenapi = responsebody;
+                var responsebody = response || {};
+                chosenapi = responsebody;
 
 
 
-                    if (chosenapi) {
-                        document.getElementById('inputdiv').innerHTML = JSON.stringify(chosenapi);
-                        //debugger;
+                if (chosenapi) {
+                    document.getElementById('inputdiv').innerHTML = JSON.stringify(chosenapi);
+                    //debugger;
 
 
-                        $.ajax({
-                                method: "PUT",
-                                url: "/fyler",
-                                data:(chosenapi)
-                            })
-                            .done(function(r,success) {
+                    $.ajax({
+                            method: "PUT",
+                            url: "/fyler",
+                            data: (chosenapi)
+                        })
+                        .done(function(r, success) {
+                            // debugger;
+                            document.getElementById('outputdiv').innerHTML = (r);
+                            console.log(r[0]);
+                            console.log("<a href='r[0]'>" + r[0] + "</a>");
+                            //debugger;
+                            if (r && r[0] && r[0].indexOf("http") > -1) {
                                 // debugger;
-                                document.getElementById('outputdiv').innerHTML = (r[0]);
-                                console.log(r[0]);
-                                console.log("<a href='r[0]'>" + r[0] + "</a>");
-                                //debugger;
-                                if (r && r[0] && r[0].indexOf("http") > -1) {
-                                    // debugger;
-                                    window.location.assign(r[0]);
-                                }
+                                window.location.assign(r[0]);
+                            }
 
-                            })
-                            .error(function(e,r){
-                                console.log(e,r);
-                            });
+                        })
+                        .error(function(e, r) {
+                            console.log(e, r);
+                        });
 
-                    }
-                 else {
+                } else {
                     document.getElementById('inputdiv').innerHTML = "Sorry,data not available."
                 }
             });
 
+        };
     };
-};
 
     function refreshpage() {
         window.location.href = "http://localhost:3000/";

@@ -4,10 +4,10 @@ var OAuth = require('oauth').OAuth;
 var OAuth2 = require('oauth').OAuth2;
 var querystring = require('querystring');
 var superagent = require("superagent");
-
-
-
 var globaljson = {}; //used to store data which will be needed in the subsequent calls.
+var utils = require("./utils/utils");
+var urlconfig = require("./utils/urlconfig");
+var ejs = require('ejs');
 
 function preparerequest(reqobj) { //this function just converts the object passed to it in a url.
     var reqstr = "?";
@@ -25,6 +25,31 @@ function preparerequest(reqobj) { //this function just converts the object passe
     console.log(reqstr);
     return reqstr;
 
+};
+
+function extend(a, b) {
+    for (var key in b) {
+        if (b.hasOwnProperty(key)) {
+            a[key] = b[key];
+        }
+    }
+    return a;
+}
+
+function getparamsfromconfig(apiobj) { //get object from config base on api and action and then merge it with incoming object.
+
+    var configobj = urlconfig[apiobj.api][apiobj.action];
+
+    var completeapiobj = extend(apiobj, configobj); //merges incoming apiobj with object from config based on the api and the action.
+
+    if (completeapiobj && completeapiobj.finalurlvariables) { //replace variable finalurlvariables in the finalurl,if it exists, with the finaurlvariables value in apiobj.
+        var temp = ejs.render(completeapiobj.finalurl, {
+            "finalurlvariables": completeapiobj.finalurlvariables
+        });
+        completeapiobj["finalurl"] = temp;
+    };
+    console.log(completeapiobj);
+    return completeapiobj;
 }
 
 
@@ -32,111 +57,149 @@ var OneApiService = function() {
 
 
     // step 1 handler
-
     var step1 = function step1(params, cb) {
+        params.apiinfo.oa = getparamsfromconfig(params.apiinfo.oa);
+        utils.modifyinput(params.apiinfo.oa, function(e, r) {
+            params.apiinfo.oa = r;
+            globaljson = params['apiinfo'];
+            if (r.oauth_access_token && r.oauth_access_token && (r.oauth_access_token.length > 0)) {
 
-        globaljson = params['apiinfo'];
-        if (params && params.apiinfo && params.apiinfo.oa && params.apiinfo.oa.oauth2diff === "true") {
-            // This if condition deals with a different flow of oauth2.
-            superagent.post(params.apiinfo.oa.requesttokenurl)
-                .send("")
-                .set({
-                    "Accept": "application/json",
-                    "Accept-Language": "en_US"
-                })
-                .auth(globaljson.oa.key1, apiinfo.oa.key2)
-                .end(function(err, response) {
-                    console.log(err, response.body);
-                    globaljson["access_token"] = response.body.token_type + " " + response.body.access_token;
+                if (globaljson.oa && (globaljson.oa.oauth1 === "true")) {
 
-                    superagent.post(globaljson.oa.oauthurl)
-                        .send(globaljson.oa.tokendata)
+                    var oa = new OAuth(globaljson.oa.requesttokenurl,
+                        globaljson.oa.oauthurl,
+                        globaljson.oa.key1,
+                        globaljson.oa.key2,
+                        globaljson.oa.version,
+                        globaljson.oa.callbackurl,
+                        globaljson.oa.encoding,
+                        null, ((globaljson && globaljson.oa && globaljson.oa.headers) || null));
+
+                    oauth1finalcallwithaccesstoken(oa, cb);
+
+                } else if (globaljson.oa && (globaljson.oa.oauth2 === "true")) {
+
+                    var oa = new OAuth2(globaljson.oa.key1,
+                        globaljson.oa.key2,
+                        globaljson.oa.accessurl,
+                        globaljson.oa.requesttokenurl,
+                        globaljson.oa.oauthurl,
+                        null);
+
+                    oauth2finalcallwithaccesstoken(oa, globaljson.oa.oauth_access_token, cb);
+
+                }
+
+
+
+            } else {
+                console.log("r from utils", r);
+
+                console.log('globaljson after modifyinput:', globaljson);
+
+                if (params && params.apiinfo && params.apiinfo.oa && params.apiinfo.oa.oauth2diff === "true") {
+                    // This if condition deals with a different flow of oauth2.
+                    superagent.post(params.apiinfo.oa.requesttokenurl)
+                        .send("")
                         .set({
                             "Accept": "application/json",
-                            "Authorization": globaljson.access_token
+                            "Accept-Language": "en_US"
                         })
-                        .end(function(err, resp) {
-                            console.log(err, resp.body);
+                        .auth(globaljson.oa.key1, apiinfo.oa.key2)
+                        .end(function(err, response) {
+                            console.log(err, response.body);
+                            globaljson["access_token"] = response.body.token_type + " " + response.body.access_token;
+
+                            superagent.post(globaljson.oa.oauthurl)
+                                .send(globaljson.oa.tokendata)
+                                .set({
+                                    "Accept": "application/json",
+                                    "Authorization": globaljson.access_token
+                                })
+                                .end(function(err, resp) {
+                                    console.log(err, resp.body);
 
 
-                            var path;
-                            var links = resp && resp.body && resp.body.links || [];
-                            console.log(links);
-                            for (var i = 0; i < links.length; i++) {
-                                if (links[i].rel === "approval_url") {
-                                    path = links[i].href;
-                                } else if (links[i].rel === "execute") {
-                                    globaljson["executeurl"] = links[i].href;
-                                }
-                            }
-                            console.log(path);
-                            cb("", [path]);
+                                    var path;
+                                    var links = resp && resp.body && resp.body.links || [];
+                                    console.log(links);
+                                    for (var i = 0; i < links.length; i++) {
+                                        if (links[i].rel === "approval_url") {
+                                            path = links[i].href;
+                                        } else if (links[i].rel === "execute") {
+                                            globaljson["executeurl"] = links[i].href;
+                                        }
+                                    }
+                                    console.log(path);
+                                    cb("", [path]);
+                                });
                         });
-                });
 
 
-        } else if (params && params.apiinfo && params.apiinfo.oa && params.apiinfo.oa.oauth2 === "true") {
-            //This if condition deals with the standard oauth2 flow followed by many apis.
+                } else if (params && params.apiinfo && params.apiinfo.oa && params.apiinfo.oa.oauth2 === "true") {
+                    //This if condition deals with the standard oauth2 flow followed by many apis.
 
-            var oa = new OAuth2(globaljson.oa.key1,
-                globaljson.oa.key2,
-                globaljson.oa.accessurl,
-                globaljson.oa.requesttokenurl,
-                globaljson.oa.oauthurl,
-                null)
+                    var oa = new OAuth2(globaljson.oa.key1,
+                        globaljson.oa.key2,
+                        globaljson.oa.accessurl || "",
+                        globaljson.oa.requesttokenurl,
+                        globaljson.oa.oauthurl,
+                        null)
 
-            var path = oa.getAuthorizeUrl(globaljson.oa.parameters); //function getAuthorizeUrl of oauth.oauth2 library is called and passed parameters which returns a path.
+                    var path = oa.getAuthorizeUrl(globaljson.oa.parameters); //function getAuthorizeUrl of oauth.oauth2 library is called and passed parameters which returns a path.
 
-            cb("", [path]); //callback gets called with the path passed in an array as argument.
+                    cb("", [path]); //callback gets called with the path passed in an array as argument.
 
-        } else {
+                } else {
 
-            if ((typeof globaljson['oauth'] !== "undefined") && (!globaljson['oauth']) && (globaljson['oa']['oauth_verifier'])) {
-                // return and proceed to step 2 in case oauth is not needed
-                step2(params, cb);
-            } else {
-
-
-
-                var list = [];
-
-
-                // GData specifid: scopes that  want access to.this is specific to google
-                var gdataScopes = [
-                    querystring.escape(globaljson.oa.url1),
-                    querystring.escape(globaljson.oa.url2)
-                ];
-
-
-                console.log(globaljson);
-                //var oa = new OAuth(globaljson.oa.requesttokenurl + "?scope=" + gdataScopes.join('+'),
-                var oa = new OAuth(globaljson.oa.requesttokenurl,
-                    globaljson.oa.oauthurl,
-                    globaljson.oa.key1,
-                    globaljson.oa.key2,
-                    globaljson.oa.version,
-                    globaljson.oa.callbackurl,
-                    // "http://localhost:5000/google_cb?action=" + querystring.escape("/google_contacts")
-                    globaljson.oa.encoding);
-
-                //first request to the oauth api provider which fetches an oauth token which is then combined with the oauth verifier url and then this url is sent back to client. This url take the user to the authorization page. 
-                oa.getOAuthRequestToken(function(error, oauth_token, oauth_token_secret, results) {
-                    if (error) {
-                        cb(error, []);
+                    if ((typeof globaljson['oauth'] !== "undefined") && (!globaljson['oauth']) && (globaljson['oa']['oauth_verifier'])) {
+                        // return and proceed to step 2 in case oauth is not needed
+                        step2(params, cb);
                     } else {
-                        // store the tokens in the globaljson.
-                        globaljson['oa']['oaobject'] = oa;
-                        globaljson['oa']['oauth_token'] = oauth_token;
-                        globaljson['oa']['oauth_token_secret'] = oauth_token_secret;
 
-                        // redirect the user to authorize the token
-                        list.push(globaljson.oa.oauth_verifier_url + oauth_token);
-                        console.log('cb', error, list);
-                        cb(error, list);
+
+
+                        var list = [];
+
+
+                        // GData specifid: scopes that  want access to.this is specific to google
+                        var gdataScopes = [
+                            querystring.escape(globaljson.oa.url1),
+                            querystring.escape(globaljson.oa.url2)
+                        ];
+
+
+                        console.log(globaljson);
+                        //var oa = new OAuth(globaljson.oa.requesttokenurl + "?scope=" + gdataScopes.join('+'),
+                        var oa = new OAuth(globaljson.oa.requesttokenurl,
+                            globaljson.oa.oauthurl,
+                            globaljson.oa.key1,
+                            globaljson.oa.key2,
+                            globaljson.oa.version,
+                            globaljson.oa.callbackurl,
+                            // "http://localhost:5000/google_cb?action=" + querystring.escape("/google_contacts")
+                            globaljson.oa.encoding);
+
+                        //first request to the oauth api provider which fetches an oauth token which is then combined with the oauth verifier url and then this url is sent back to client. This url take the user to the authorization page. 
+                        oa.getOAuthRequestToken(function(error, oauth_token, oauth_token_secret, results) {
+                            if (error) {
+                                cb(error, []);
+                            } else {
+                                // store the tokens in the globaljson.
+                                globaljson['oa']['oaobject'] = oa;
+                                globaljson['oa']['oauth_token'] = oauth_token;
+                                globaljson['oa']['oauth_token_secret'] = oauth_token_secret;
+
+                                // redirect the user to authorize the token
+                                list.push(globaljson.oa.oauth_verifier_url + oauth_token);
+                                console.log('cb', error, list);
+                                cb(error, list);
+                            }
+                        });
                     }
-                });
-            }
-        };
+                };
+            };
+        });
     };
 
     // step 2 handler    
@@ -156,9 +219,17 @@ var OneApiService = function() {
                 })
         } else if (globaljson && globaljson.oa && globaljson.oa.oauth2 === "true") {
             //the standard oauth flow  is handled here.
+
+            if (globaljson.oa.step2parameters && globaljson.oa.step2parameters.appendtourl && (globaljson.oa.step2parameters.appendtourl === "true")) { //some apis like smarterer's api,for the access_token request , expect the parameters in url.This case is handled here with appendtourl flag.
+
+                delete globaljson.oa.step2parameters.appendtourl;
+
+                globaljson.oa.oauthurl = globaljson.oa.oauthurl + "?client_id=" + globaljson.oa.key1 + "&client_secret=" + globaljson.oa.key2 + "&code=" + params.apiinfo.oa.oauth_verifier + "&" + querystring.stringify(globaljson.oa.step2parameters);
+            };
+
             var oa = new OAuth2(globaljson.oa.key1,
                 globaljson.oa.key2,
-                globaljson.oa.accessurl,
+                globaljson.oa.accessurl || "",
                 globaljson.oa.requesttokenurl,
                 globaljson.oa.oauthurl,
                 null)
@@ -169,50 +240,44 @@ var OneApiService = function() {
 
             oa.getOAuthAccessToken(params.apiinfo.oa.oauth_verifier, globaljson.oa.step2parameters, function(a, access_token, refresh_token, results) { //this function from oauth lib makes a request with the code (params.apiinfo.oa.oauth_verifier) and step2parameter passed by the client.Returns access token.
 
-                console.log('token', access_token, refresh_token, results);
+                    console.log('token', access_token, refresh_token, results);
 
-                if (globaljson.oa.finalurlmethod === "GET") { //final request if the method for the final request is get.
-                    oa.get(globaljson.oa.finalurl, access_token, function(nullarg, result, response) { //function belongs to oauth.auth2 lib,works for the get type of request.Arguments passed are url for the final request the access_token fetched and a callback.
+                    // store the access token in the globaljson
+                    globaljson.oa.oauth_access_token = access_token || "";
+                    globaljson.oa.oauth_access_token_secret = refresh_token || "";
 
-                        console.log(result);
-
-                        cb({}, result);
+                    utils.saveinput(globaljson.oa, function(e, r) {
+                        console.log("r from utils", r);
+                        console.log("globaljson before entering into protected:", globaljson);
+                        oauth2finalcallwithaccesstoken(oa, globaljson.oa.oauth_access_token, cb);
                     });
 
-                } else if (globaljson.oa.finalurlmethod === "POST") { //final request if the method for the final request is post.
 
-                    var finalrequestparams = globaljson.oa.finalurldata || {}; //data to be sent along the final post request.
 
-                    finalrequestparams['access_token'] = access_token; //access_token also set in the finalrequestparams.
 
-                    //below is a superagent request for the final request to the intended api endpoint.
-                    superagent.post(globaljson.oa.finalurl + "?" + querystring.stringify(finalrequestparams))
-                        .send("")
-                        .end(function(err, response) {
-                            cb(err, response.text);
-                        })
 
-                } else if (globaljson.oa.finalurlmethod === "PUT") { //final request if the method for the final request is post.
+                })
+                /*var url = "https://smarterer.com/oauth/access_token?client_id=1fbf85fbad9042238a6496fd2467cb72&client_secret=ad20c122afb6ff2eb4f284ae053739d8&grant_type=authorization_code&code="+params.apiinfo.oa.oauth_verifier;
+                            oa._request("GET",url ,null,null, null, function(a, access_token, refresh_token, results) { //this function from oauth lib makes a request with the code (params.apiinfo.oa.oauth_verifier) and step2parameter passed by the client.Returns access token.
 
-                    var finalrequestparams = globaljson.oa.finalurldata || {}; //data to be sent along the final post request.
-                    var finalrequestbody = globaljson.oa.finalrequestbody || "";
-                    console.log("finalrequestparams", finalrequestparams, finalrequestbody);
-                    finalrequestparams['access_token'] = access_token; //access_token also set in the finalrequestparams.
-                    var contentlength = finalrequestbody.length || 0;
-                    globaljson.oa.finalrequestheaders['Content-Length'] = contentlength;
-                    //below is a superagent request for the final request to the intended api endpoint.
-                    console.log('finalrequestheaders', globaljson.oa.finalrequestheaders);
-                    superagent.put(globaljson.oa.finalurl + "?" + querystring.stringify(finalrequestparams))
-                        .set(globaljson.oa.finalrequestheaders || {})
-                        .send(finalrequestbody)
-                        .end(function(err, response) {
-                            console.log("err", err, "res", response.text);
-                            cb(err, response.text);
-                        })
+                                console.log('token', access_token, refresh_token, results);
 
-                };
-            })
+                                // store the access token in the globaljson
+                                globaljson.oa.oauth_access_token = access_token || "";
+                                globaljson.oa.oauth_access_token_secret = refresh_token || "";
 
+                                utils.saveinput(globaljson.oa, function(e, r) {
+                                    console.log("r from utils", r);
+                                    console.log("globaljson before entering into protected:", globaljson);
+                                    oauth2finalcallwithaccesstoken(oa, globaljson.oa.oauth_access_token, cb);
+                                });
+
+
+
+
+
+                            })
+                */
 
 
         } else {
@@ -228,7 +293,7 @@ var OneApiService = function() {
                 var oafromsession = globaljson['oa']['oaobject'];
                 //UtilsService.mergeJSON(globaljson, params['apiinfo']);
 
-                var data = [];
+
 
                 console.log('oafromsession', oafromsession);
                 console.log('globlajson', globaljson);
@@ -263,53 +328,13 @@ var OneApiService = function() {
 
                             var url = globaljson['oa'].oauth_verifier_url + oauth_access_token;
 
+                            utils.saveinput(globaljson.oa, function(e, r) {
+                                console.log("r from utils", r);
+                                console.log("globaljson before entering into protected:", globaljson);
+                                oauth1finalcallwithaccesstoken(oa, cb);
+                            });
 
 
-                            //Below are the final calls based on the http method and the api endpoint urls.
-
-                            if (globaljson.oa.finalurlmethod === "GET" || globaljson.oa.finalurlmethod === "DELETE") {
-                                var httpmethod = "";
-                                if (globaljson.oa.finalurlmethod === "GET") {
-                                    httpmethod = "get";
-                                } else if (globaljson.oa.finalurlmethod === "DELETE") {
-                                    httpmethod = "delete";
-
-                                }
-                                //call to the oauth lib based on the httpmethod.
-                                oa[httpmethod](globaljson.oa.finalurl,
-                                    globaljson.oa.oauth_access_token,
-                                    globaljson.oa.oauth_access_token_secret,
-                                    function(error, d, response) {
-
-                                        data = d;
-                                        cb(error, data);
-
-                                    })
-                            } else if (globaljson.oa.finalurlmethod === "POST" || globaljson.oa.finalurlmethod === "PUT") {
-                                var httpmethod = "";
-                                if (globaljson.oa.finalurlmethod === "POST") {
-                                    httpmethod = "post";
-                                } else if (globaljson.oa.finalurlmethod === "PUT") {
-                                    httpmethod = "put";
-
-                                }
-                                console.log('oa', oa);
-                                if (globaljson && globaljson.oa && globaljson.oa.finalurldatastringify && globaljson.oa.finalurldatastringify === "true") { //Some apis expect the data to be sent as query parameter even in the post request.Therefore the finalurldata object is stringified here if finalurldatastringify is set to true.
-                                    globaljson.oa.finalurldata = JSON.stringify(globaljson.oa.finalurldata);
-                                }
-                                //call to the oauth lib based on the httpmethod.
-                                oa[httpmethod](globaljson.oa.finalurl,
-                                    globaljson.oa.oauth_access_token,
-                                    globaljson.oa.oauth_access_token_secret,
-                                    globaljson.oa.finalurldata,
-                                    globaljson.oa.finalurlcontenttype,
-                                    function(error, d, response) {
-
-                                        data = d;
-                                        cb(error, data);
-
-                                    })
-                            }
 
 
 
@@ -337,7 +362,7 @@ var OneApiService = function() {
                     superagent.get(globaljson.oa.finalurl)
                         .set(globaljson.oa.headers || {})
                         .end(function(err, response) {
-                            console.log(response.text);
+                            console.log("non oauth get:", response.text);
 
                             cb(err, response.text);
                         });
@@ -358,7 +383,102 @@ var OneApiService = function() {
         };
     };
 
+    function oauth1finalcallwithaccesstoken(oa, cb) {
 
+        //Below are the final calls based on the http method and the api endpoint urls.
+
+        var data = [];
+        if (globaljson.oa.finalurlmethod === "GET" || globaljson.oa.finalurlmethod === "DELETE") {
+            var httpmethod = "";
+            if (globaljson.oa.finalurlmethod === "GET") {
+                httpmethod = "get";
+            } else if (globaljson.oa.finalurlmethod === "DELETE") {
+                httpmethod = "delete";
+
+            }
+            //call to the oauth lib based on the httpmethod.
+            oa[httpmethod](globaljson.oa.finalurl,
+                globaljson.oa.oauth_access_token,
+                globaljson.oa.oauth_access_token_secret,
+                function(error, d, response) {
+
+                    data = d;
+                    cb(error, data);
+
+                })
+        } else if (globaljson.oa.finalurlmethod === "POST" || globaljson.oa.finalurlmethod === "PUT") {
+            var httpmethod = "";
+            if (globaljson.oa.finalurlmethod === "POST") {
+                httpmethod = "post";
+            } else if (globaljson.oa.finalurlmethod === "PUT") {
+                httpmethod = "put";
+
+            }
+            console.log('oa', oa);
+            if (globaljson && globaljson.oa && globaljson.oa.finalurldatastringify && globaljson.oa.finalurldatastringify === "true") { //Some apis expect the data to be sent as query parameter even in the post request.Therefore the finalurldata object is stringified here if finalurldatastringify is set to true.
+                globaljson.oa.finalurldata = JSON.stringify(globaljson.oa.finalurldata);
+            }
+            //call to the oauth lib based on the httpmethod.
+            oa[httpmethod](globaljson.oa.finalurl,
+                globaljson.oa.oauth_access_token,
+                globaljson.oa.oauth_access_token_secret,
+                globaljson.oa.finalurldata,
+                globaljson.oa.finalurlcontenttype,
+                function(error, d, response) {
+
+                    data = d;
+                    cb(error, data);
+
+                })
+        }
+
+
+    };
+
+    function oauth2finalcallwithaccesstoken(oa, access_token, cb) {
+
+        if (globaljson.oa.finalurlmethod === "GET") { //final request if the method for the final request is get.
+            oa.get(globaljson.oa.finalurl, access_token, function(nullarg, result, response) { //function belongs to oauth.auth2 lib,works for the get type of request.Arguments passed are url for the final request the access_token fetched and a callback.
+
+                console.log(result);
+
+                cb({}, result);
+            });
+
+        } else if (globaljson.oa.finalurlmethod === "POST") { //final request if the method for the final request is post.
+
+            var finalrequestparams = globaljson.oa.finalurldata || {}; //data to be sent along the final post request.
+
+            finalrequestparams['access_token'] = access_token; //access_token also set in the finalrequestparams.
+
+            //below is a superagent request for the final request to the intended api endpoint.
+            superagent.post(globaljson.oa.finalurl + "?" + querystring.stringify(finalrequestparams))
+                .send("")
+                .end(function(err, response) {
+                    cb(err, response.text);
+                })
+
+        } else if (globaljson.oa.finalurlmethod === "PUT") { //final request if the method for the final request is post.
+
+            var finalrequestparams = globaljson.oa.finalurldata || {}; //data to be sent along the final post request.
+            var finalrequestbody = globaljson.oa.finalrequestbody || "";
+            console.log("finalrequestparams", finalrequestparams, finalrequestbody);
+            finalrequestparams['access_token'] = access_token; //access_token also set in the finalrequestparams.
+            var contentlength = finalrequestbody.length || 0;
+            globaljson.oa.finalrequestheaders['Content-Length'] = contentlength;
+            //below is a superagent request for the final request to the intended api endpoint.
+            console.log('finalrequestheaders', globaljson.oa.finalrequestheaders);
+            superagent.put(globaljson.oa.finalurl + "?" + querystring.stringify(finalrequestparams))
+                .set(globaljson.oa.finalrequestheaders || {})
+                .send(finalrequestbody)
+                .end(function(err, response) {
+                    console.log("err", err, "res", response.text);
+                    cb(err, response.text);
+                })
+
+        };
+
+    };
 
 
 
