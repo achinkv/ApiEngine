@@ -4,22 +4,14 @@
         "handler": "step1",
         "apiinfo": {
             "oa": {
-                "oauthurl": "https://api.twitter.com/oauth/access_token",
-                "requesttokenurl": "https://api.twitter.com/oauth/request_token",
-                "key1": "xxxxxxxxxxxxxxxxxxx",
-                "key2": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-                "version": "1.0",
+                "appname": "applex",
+                "uid": "admin",
+                "key1": "xxxxxxxxxxxxx",
+                "key2": "xxxxxxxxxxxxxxxx",
+                "api": "TWITTER",
+                "action": "DELETETWEET",
                 "callbackurl": "http://localhost:3000/",
-                "encoding": "HMAC-SHA1",
-                "oauth_verifier_url": "https://api.twitter.com/oauth/authenticate?oauth_token=",
-                "oauth_verifier": "<%= oauth_verifier %>",
-                "finalurl": "https://api.twitter.com/1.1/statuses/destroy/569104026928680960.json",
-                "finalurldata": {
-                    "id": "569104026928680960"
-                },
-                "finalurlcontenttype": "application/json",
-                "finalurlmethod": "POST"
-
+                "finalurlvariables": "569104026928680960"
             }
         }
     }]

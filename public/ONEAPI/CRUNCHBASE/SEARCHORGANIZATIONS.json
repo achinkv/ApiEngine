@@ -1,0 +1,18 @@
+{
+    "commands": [{
+        "what": "OneApiService",
+        "handler": "step1",
+        "apiinfo": {
+            "oa": {
+                "appname": "applex",
+                "uid": "admin",
+                "key1": "xxxxxxxxxxxxx",
+                "api": "CRUNCHBASE",
+                "action": "SEARCHORGANIZATIONS",
+                "finalurldata": {
+                    "query": "infosys"
+                }
+            }
+        }
+    }]
+}

@@ -1,26 +1,21 @@
 {
-            "commands": [{
-                "what": "OneApiService",
-                "handler": "step1",
-                "apiinfo": {
-                    "oa": {
-                        "oauthurl": "https://api.twitter.com/oauth/access_token",
-                        "requesttokenurl": "https://api.twitter.com/oauth/request_token",
-                        "key1": "xxxxxxxxxxxxxxxxxxx",
-                        "key2": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-                        "version": "1.0",
-                        "callbackurl": "http://localhost:3000/",
-                        "encoding": "HMAC-SHA1",
-                        "oauth_verifier_url": "https://api.twitter.com/oauth/authenticate?oauth_token=",
-                        "oauth_verifier": "<%= oauth_verifier %>",
-                        "finalurl": "https://api.twitter.com/1.1/statuses/update.json",
-                        "finalurldata": {
-                            "status": "This my first image tweet",
-                            "media_ids":"577469245711241216"
-                        },
-                        "finalurlcontenttype": "application/json",
-                        "finalurlmethod": "POST"
-                    }
+    "commands": [{
+        "what": "OneApiService",
+        "handler": "step1",
+        "apiinfo": {
+            "oa": {
+                "appname": "applex",
+                "uid": "admin",
+                "key1": "xxxxxxxxxxxxx",
+                "key2": "xxxxxxxxxxxxxxxx",
+                "api": "TWITTER",
+                "action": "TWEETIMAGE",
+                "callbackurl": "http://localhost:3000/",
+                "finalurldata": {
+                    "status": "This my first image tweet",
+                    "media_ids": "577469245711241216"
                 }
-            }]
+            }
         }
+    }]
+}

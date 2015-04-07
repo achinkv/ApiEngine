@@ -6,7 +6,7 @@ var querystring = require('querystring');
 var superagent = require("superagent");
 var globaljson = {}; //used to store data which will be needed in the subsequent calls.
 var utils = require("./utils/utils");
-var urlconfig = require("./utils/urlconfig");
+var apiconfig = require("./utils/apiconfig");
 var ejs = require('ejs');
 
 function preparerequest(reqobj) { //this function just converts the object passed to it in a url.
@@ -38,18 +38,16 @@ function extend(a, b) {
 
 function getparamsfromconfig(apiobj) { //get object from config base on api and action and then merge it with incoming object.
 
-    var configobj = urlconfig[apiobj.api][apiobj.action];
+    var configobj = apiconfig[apiobj.api][apiobj.action];
 
     var completeapiobj = extend(apiobj, configobj); //merges incoming apiobj with object from config based on the api and the action.
 
-    if (completeapiobj && completeapiobj.finalurlvariables) { //replace variable finalurlvariables in the finalurl,if it exists, with the finaurlvariables value in apiobj.
-        var temp = ejs.render(completeapiobj.finalurl, {
-            "finalurlvariables": completeapiobj.finalurlvariables
-        });
-        completeapiobj["finalurl"] = temp;
-    };
-    console.log(completeapiobj);
-    return completeapiobj;
+    var temp = JSON.stringify(completeapiobj);
+    var mergedstring = ejs.render(temp, completeapiobj);
+    var mergedobj = JSON.parse(mergedstring);
+
+    console.log(mergedobj);
+    return mergedobj;
 }
 
 
@@ -58,11 +56,16 @@ var OneApiService = function() {
 
     // step 1 handler
     var step1 = function step1(params, cb) {
-        params.apiinfo.oa = getparamsfromconfig(params.apiinfo.oa);
         utils.modifyinput(params.apiinfo.oa, function(e, r) {
             params.apiinfo.oa = r;
+            params.apiinfo.oa = getparamsfromconfig(params.apiinfo.oa);
             globaljson = params['apiinfo'];
-            if (r.oauth_access_token && r.oauth_access_token && (r.oauth_access_token.length > 0)) {
+
+            if (!(globaljson.oa.hasOwnProperty("oauth2") || globaljson.oa.hasOwnProperty("oauth1"))) {
+
+                callnonoauthapis(globaljson, cb);
+
+            } else if (r.oauth_access_token && r.oauth_access_token && (r.oauth_access_token.length > 0)) {
 
                 if (globaljson.oa && (globaljson.oa.oauth1 === "true")) {
 
@@ -146,7 +149,7 @@ var OneApiService = function() {
                         globaljson.oa.oauthurl,
                         null)
 
-                    var path = oa.getAuthorizeUrl(globaljson.oa.parameters); //function getAuthorizeUrl of oauth.oauth2 library is called and passed parameters which returns a path.
+                    var path = oa.getAuthorizeUrl(globaljson.oa.parameters || {}); //function getAuthorizeUrl of oauth.oauth2 library is called and passed parameters which returns a path.
 
                     cb("", [path]); //callback gets called with the path passed in an array as argument.
 
@@ -240,44 +243,24 @@ var OneApiService = function() {
 
             oa.getOAuthAccessToken(params.apiinfo.oa.oauth_verifier, globaljson.oa.step2parameters, function(a, access_token, refresh_token, results) { //this function from oauth lib makes a request with the code (params.apiinfo.oa.oauth_verifier) and step2parameter passed by the client.Returns access token.
 
-                    console.log('token', access_token, refresh_token, results);
+                console.log('token', access_token, refresh_token, results);
 
-                    // store the access token in the globaljson
-                    globaljson.oa.oauth_access_token = access_token || "";
-                    globaljson.oa.oauth_access_token_secret = refresh_token || "";
+                // store the access token in the globaljson
+                globaljson.oa.oauth_access_token = access_token || "";
+                globaljson.oa.oauth_access_token_secret = refresh_token || "";
 
-                    utils.saveinput(globaljson.oa, function(e, r) {
-                        console.log("r from utils", r);
-                        console.log("globaljson before entering into protected:", globaljson);
-                        oauth2finalcallwithaccesstoken(oa, globaljson.oa.oauth_access_token, cb);
-                    });
-
-
-
-
-
-                })
-                /*var url = "https://smarterer.com/oauth/access_token?client_id=1fbf85fbad9042238a6496fd2467cb72&client_secret=ad20c122afb6ff2eb4f284ae053739d8&grant_type=authorization_code&code="+params.apiinfo.oa.oauth_verifier;
-                            oa._request("GET",url ,null,null, null, function(a, access_token, refresh_token, results) { //this function from oauth lib makes a request with the code (params.apiinfo.oa.oauth_verifier) and step2parameter passed by the client.Returns access token.
-
-                                console.log('token', access_token, refresh_token, results);
-
-                                // store the access token in the globaljson
-                                globaljson.oa.oauth_access_token = access_token || "";
-                                globaljson.oa.oauth_access_token_secret = refresh_token || "";
-
-                                utils.saveinput(globaljson.oa, function(e, r) {
-                                    console.log("r from utils", r);
-                                    console.log("globaljson before entering into protected:", globaljson);
-                                    oauth2finalcallwithaccesstoken(oa, globaljson.oa.oauth_access_token, cb);
-                                });
+                utils.saveinput(globaljson.oa, function(e, r) {
+                    console.log("r from utils", r);
+                    console.log("globaljson before entering into protected:", globaljson);
+                    oauth2finalcallwithaccesstoken(oa, globaljson.oa.oauth_access_token, cb);
+                });
 
 
 
 
 
-                            })
-                */
+            })
+
 
 
         } else {
@@ -342,42 +325,6 @@ var OneApiService = function() {
                         }
                     });
 
-            } else {
-
-                //This else block caters to apis which are basically non-oauth.Direct calls are made to the api endpoints based upon the data passed in the params i.e url,data,headers.
-                if (params && params.apiinfo && params.apiinfo.oa && params.apiinfo.oa.finalurldata && params.apiinfo.oa.finalurldata && params.apiinfo.oa.finalurldata.url) {
-                    console.log('non-oauth block', params.apiinfo);
-                    params.apiinfo.oa.finalurl = preparerequest(params.apiinfo.oa.finalurldata);
-
-                } else {
-                    console.log('finalurl', globaljson.oa.finalurl);
-                    params.apiinfo.oa.finalurl = globaljson.oa.finalurl.replace(/&amp;/g, '&'); // TODO :: FIND A BETTER WAY TO DECODE SUCH ENTITIES
-
-                }
-
-
-
-
-                if (globaljson.oa.finalurlmethod === "GET") {
-                    superagent.get(globaljson.oa.finalurl)
-                        .set(globaljson.oa.headers || {})
-                        .end(function(err, response) {
-                            console.log("non oauth get:", response.text);
-
-                            cb(err, response.text);
-                        });
-                } else {
-                    console.log('globaljson.oa:', globaljson.oa);
-                    superagent(globaljson.oa.finalurlmethod, globaljson.oa.finalurl)
-                        .send(globaljson.oa.finalurldata)
-                        .auth(globaljson.oa && globaljson.oa.auth && globaljson.oa.auth.u || '', globaljson.oa.auth && globaljson.oa.auth && globaljson.oa.auth.p || '') // TODO :: handle this as per the APIINFO object layter
-                        .end(function(err, response) {
-
-                            cb(err, response.text);
-                        });
-                }
-
-
             }
 
         };
@@ -438,6 +385,11 @@ var OneApiService = function() {
     function oauth2finalcallwithaccesstoken(oa, access_token, cb) {
 
         if (globaljson.oa.finalurlmethod === "GET") { //final request if the method for the final request is get.
+
+            if (globaljson.oa.finalurldata) {
+
+                globaljson.oa.finalurl += "?" + querystring.stringify(globaljson.oa.finalurldata);
+            };
             oa.get(globaljson.oa.finalurl, access_token, function(nullarg, result, response) { //function belongs to oauth.auth2 lib,works for the get type of request.Arguments passed are url for the final request the access_token fetched and a callback.
 
                 console.log(result);
@@ -479,6 +431,92 @@ var OneApiService = function() {
         };
 
     };
+
+    function callnonoauthapis(params, cb) {
+
+
+        //This else block caters to apis which are basically non-oauth.Direct calls are made to the api endpoints based upon the data passed in the params i.e url,data,headers.
+        /* if (globaljson.oa && globaljson.oa.finalurldata &&  globaljson.oa.finalurl) {
+             console.log('non-oauth block', params.apiinfo);
+             params.apiinfo.oa.finalurl = preparerequest(params.apiinfo.oa.finalurldata);
+
+         } else {
+             console.log('finalurl', globaljson.oa.finalurl);
+             params.apiinfo.oa.finalurl = globaljson.oa.finalurl.replace(/&amp;/g, '&'); // TODO :: FIND A BETTER WAY TO DECODE SUCH ENTITIES
+
+         }*/
+
+
+
+
+        if (globaljson.oa.finalurlmethod === "GET") {
+            var requrl = globaljson.oa.finalurl;
+
+            if (globaljson.oa.finalurldata) {
+
+
+                if (requrl.indexOf("?") > -1) {
+
+                    requrl += "&" + querystring.stringify(globaljson.oa.finalurldata);
+
+                } else {
+                    requrl += "?" + querystring.stringify(globaljson.oa.finalurldata);
+                }
+            }
+
+            if (globaljson.oa.keyname) {
+                if (requrl.indexOf("?") > -1) {
+
+                    requrl += "&" + globaljson.oa.keyname + "=" + globaljson.oa.key1;
+
+                } else {
+                    requrl += "?" + globaljson.oa.keyname + "=" + globaljson.oa.key1;
+                }
+
+            }
+
+            superagent.get(requrl)
+                .set(globaljson.oa.headers || {})
+                .end(function(err, response) {
+                    console.log("non oauth get:", response.text);
+
+                    cb(err, response.text);
+                });
+
+        } else if (globaljson.oa.finalurlmethod === "POST") {
+            console.log('globaljson.oa:', globaljson.oa);
+
+            if (globaljson.oa.keyname && globaljson.oa.addkeytodata === "true") {
+
+                globaljson.oa.finalurldata[globaljson.oa.keyname] = globaljson.oa.key1;
+
+
+            };
+
+           // globaljson.oa.finalurl += "?" + querystring.stringify(globaljson.oa.finalurldata);
+
+            superagent(globaljson.oa.finalurlmethod, globaljson.oa.finalurl)
+                //superagent(globaljson.oa.finalurlmethod, "http://requestb.in/otolpyot")
+                .set(globaljson.oa.headers || {})
+                .send(globaljson.oa.finalurldata)
+                .auth(globaljson.oa && globaljson.oa.auth && globaljson.oa.auth.u || '', globaljson.oa.auth && globaljson.oa.auth && globaljson.oa.auth.p || '') // TODO :: handle this as per the APIINFO object layter
+                .end(function(err, response) {
+
+                    cb(err, response.text);
+                });
+
+        } else {
+
+            console.log('globaljson.oa:', globaljson.oa);
+            superagent(globaljson.oa.finalurlmethod, globaljson.oa.finalurl)
+                .send(globaljson.oa.finalurldata)
+                .auth(globaljson.oa && globaljson.oa.auth && globaljson.oa.auth.u || '', globaljson.oa.auth && globaljson.oa.auth && globaljson.oa.auth.p || '') // TODO :: handle this as per the APIINFO object layter
+                .end(function(err, response) {
+
+                    cb(err, response.text);
+                });
+        }
+    }
 
 
 

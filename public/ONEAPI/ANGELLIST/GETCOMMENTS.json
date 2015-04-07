@@ -1,0 +1,20 @@
+{
+    "commands": [{
+        "what": "OneApiService",
+        "handler": "step1",
+        "apiinfo": {
+            "oa": {
+                "appname": "applex",
+                "uid": "admin",
+                "key1": "xxxxxxxxxxxxx",
+                "key2": "xxxxxxxxxxxxxxxx",
+                "api": "ANGELLIST",
+                "action": "GETCOMMENTS",
+                "finalurldata": {
+                    "commentable_type": "Startup",
+                    "commentable_id": "429481"
+                }
+            }
+        }
+    }]
+}

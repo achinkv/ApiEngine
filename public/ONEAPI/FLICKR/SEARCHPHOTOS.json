@@ -1,0 +1,19 @@
+{
+    "commands": [{
+        "what": "OneApiService",
+        "handler": "step1",
+        "apiinfo": {
+            "oa": {
+                "appname": "applex",
+                "api": "FLICKR",
+                "action": "SEARCHPHOTOS",
+                "uid": "admin",
+                "key1": "xxxxxxxxxxxxx",
+                "finalurldata": {
+                    "per_page": "500",
+                    "tags": "india"
+                }
+            }
+        }
+    }]
+}

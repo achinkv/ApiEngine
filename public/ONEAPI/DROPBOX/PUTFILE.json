@@ -4,15 +4,14 @@
         "handler": "step1",
         "apiinfo": {
             "oa": {
-                "oauth2": "true",
-                "oauthurl": "https://api.dropbox.com/1/oauth2/token",
-                "requesttokenurl": "https://www.dropbox.com/1/oauth2/authorize",
+                "appname": "applex",
+                "uid": "admin",
                 "key1": "xxxxxxxxxxxxx",
                 "key2": "xxxxxxxxxxxxxxxx",
-                "version": "1.0",
-                "callbackurl": "http://localhost:3000/",
-                "encoding": "HMAC-SHA1",
-                "finalurl": "https://api-content.dropbox.com/1/files_put/auto/hello.txt",
+                "api": "DROPBOX",
+                "action": "PUTFILE",
+                "finalrequestbody": "This is the text that will be written to the file",
+                "finalurlvariables":"hello.txt",//full path of the file to be made 
                 "parameters": {
                     "redirect_uri": "http://localhost:3000/",
                     "response_type": "code"
@@ -20,15 +19,7 @@
                 "step2parameters": {
                     "redirect_uri": "http://localhost:3000/",
                     "grant_type": "authorization_code"
-                },
-                "finalurldata": {
-                    "param": "val"
-                },
-                "finalrequestbody": "This is the text that will be written to the file",
-                "finalrequestheaders": {
-                    "Content-Type": "text/plain"
-                },
-                "finalurlmethod": "PUT"
+                }
             }
         }
     }]

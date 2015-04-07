@@ -1,0 +1,21 @@
+{
+    "commands": [{
+        "what": "OneApiService",
+        "handler": "step1",
+        "apiinfo": {
+            "oa": {
+                "appname": "applex",
+                "api": "TWILIO",
+                "action": "SENDMESSAGE",
+                "uid": "admin",
+                "key1": "xxxxxxxxxxxxx",
+                "key2": "xxxxxxxxxxxxxxxx",
+                "finalurldata": {
+                    "Body": "Hello from oneapi",
+                    "From": "+15XXXXXXX",
+                    "To": "+91XXXXXXX"
+                }
+            }
+        }
+    }]
+}

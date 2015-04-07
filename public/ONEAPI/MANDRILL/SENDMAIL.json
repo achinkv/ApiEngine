@@ -1,0 +1,31 @@
+{
+    "commands": [{
+        "what": "OneApiService",
+        "handler": "step1",
+        "apiinfo": {
+            "oa": {
+                "appname":"applex",
+                "api": "MANDRILL",                
+                "action": "SENDMAIL",
+                "uid": "admin",
+                "finalurldata": {
+                    "message": {
+                        "html": "<p>Hello from oneapi</p>",
+                        "text": "Example text content",
+                        "subject": "example subject",
+                        "from_email": "emailaddress@emailprovider.com",
+                        "from_name": "from_name",
+                        "to": [{
+                            "email": "emailaddress@emailprovider.com",
+                            "name": "name",
+                            "type": "to"
+                        }],
+                        "headers": {
+                            "Reply-To": "emailaddress@emailprovider.com"
+                        }
+                    }
+                }
+            }
+        }
+    }]
+}

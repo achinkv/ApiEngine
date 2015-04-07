@@ -1,0 +1,19 @@
+{
+    "commands": [{
+        "what": "OneApiService",
+        "handler": "step1",
+        "apiinfo": {
+            "oa": {
+                "appname": "applex",
+                "api": "YOUTUBE",
+                "action": "SEARCHVIDEOS",
+                "uid": "admin",
+                "key1": "xxxxxxxxxxxxx",
+                "finalurldata": {
+                    "q": "javascript",
+                    "maxResults": "50"
+                }
+            }
+        }
+    }]
+}

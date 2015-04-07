@@ -4,29 +4,19 @@
         "handler": "step1",
         "apiinfo": {
             "oa": {
-                "oauthurl": "https://api.linkedin.com/uas/oauth/accessToken",
-                "requesttokenurl": "https://api.linkedin.com/uas/oauth/requestToken",
-                "key1": "xxxxxxxxxxxxxxx",
-                "key2": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-                "version": "1.0",
-                "callbackurl": "http://localhost:3000/",
-                "encoding": "HMAC-SHA1",
-                "oauth_verifier_url": "https://www.linkedin.com/uas/oauth/authorize?oauth_token=",
-                "oauth_verifier": "<%= oauth_verifier %>",
-                "finalurl": "https://api.linkedin.com/v1/people/~/shares?format=json",
+                "appname": "applex",
+                "uid": "admin",
+                "key1": "xxxxxxxxxxxxx",
+                "key2": "xxxxxxxxxxxxxxxx",
+                "api": "LINKEDIN",
+                "action": "POST",
                 "finalurldata": {
                     "comment": "fun weekend",
                     "visibility": {
                         "code": "anyone"
                     }
                 },
-                "finalurldatastringify": "true",
-                "headers": {
-                    "Content-Type": "application/json",
-                    "x-li-format": "json"
-                },
-                "finalurlcontenttype": "application/json",
-                "finalurlmethod": "POST"
+                "callbackurl": "http://localhost:3000"
             }
         }
     }]

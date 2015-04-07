@@ -4,24 +4,14 @@
         "handler": "step1",
         "apiinfo": {
             "oa": {
-                "oauthurl": "https://api.linkedin.com/uas/oauth/accessToken",
-                "requesttokenurl": "https://api.linkedin.com/uas/oauth/requestToken",
-                "key1": "xxxxxxxxxxxxxxx",
-                "key2": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-                "version": "1.0",
-                "callbackurl": "http://localhost:3000/",
-                "encoding": "HMAC-SHA1",
-                "oauth_verifier_url": "https://www.linkedin.com/uas/oauth/authenticate?oauth_token=",
-                "oauth_verifier": "<%= oauth_verifier %>",
-                "finalurl": "https://api.linkedin.com/v1/people/~/network/updates/key=UPDATE-327322237-5982120250160803840/is-liked?format=json",
-                "finalurldata": "true",
-                "finalurldatastringify": "true",
-                "headers": {
-                    "Content-Type": "application/json",
-                    "x-li-format": "json"
-                },
-                "finalurlcontenttype": "application/json",
-                "finalurlmethod": "PUT"
+                "appname": "applex",
+                "uid": "admin",
+                "key1": "xxxxxxxxxxxxx",
+                "key2": "xxxxxxxxxxxxxxxx",
+                "api": "LINKEDIN",
+                "action":"LIKEPOST",
+                "finalurlvariables": "UPDATE-327322237-5982120250160803840",//id of the post to like.
+                "callbackurl": "http://localhost:3000"
             }
         }
     }]

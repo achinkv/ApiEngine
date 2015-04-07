@@ -1,0 +1,17 @@
+{
+    "commands": [{
+        "what": "OneApiService",
+        "handler": "step1",
+        "apiinfo": {
+            "oa": {
+                "appname": "applex",
+                "api": "WIKIPEDIA",
+                "action": "GETCONTENT",
+                "uid": "admin",
+                "finalurldata": {
+                   "titles": "Narendra Modi"
+                }
+            }
+        }
+    }]
+}

@@ -4,15 +4,13 @@
         "handler": "step1",
         "apiinfo": {
             "oa": {
-                "oauth2": "true",
-                "oauthurl": "https://api.dropbox.com/1/oauth2/token",
-                "requesttokenurl": "https://www.dropbox.com/1/oauth2/authorize",
+                "appname": "applex",
+                "uid": "admin",
                 "key1": "xxxxxxxxxxxxx",
                 "key2": "xxxxxxxxxxxxxxxx",
-                "version": "1.0",
-                "callbackurl": "http://localhost:3000/",
-                "encoding": "HMAC-SHA1",
-                "finalurl": "https://api-content.dropbox.com/1/files/auto/payk/2014307182216.jpg",
+                "api": "DROPBOX",
+                "action": "GETFILE",
+                "finalurlvariables": "payk/2014307182216.jpg",//complete path of the file.
                 "parameters": {
                     "redirect_uri": "http://localhost:3000/",
                     "response_type": "code"
@@ -20,11 +18,8 @@
                 "step2parameters": {
                     "redirect_uri": "http://localhost:3000/",
                     "grant_type": "authorization_code"
-                },
-                "finalurldata": {
+                }
 
-                },
-                "finalurlmethod": "GET"
             }
         }
     }]

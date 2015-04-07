@@ -1,0 +1,25 @@
+{
+    "commands": [{
+        "what": "OneApiService",
+        "handler": "step1",
+        "apiinfo": {
+            "oa": {
+                "appname": "applex",
+                "uid": "admin",
+                "key1": "xxxxxxxxxxxxx",
+                "key2": "xxxxxxxxxxxxxxxx",
+                "api": "SMARTERER",
+                "action": "GETBADGES",
+                "finalurlvariables": "saurshaz",
+                "parameters": {
+                    "callback_url": "http://localhost:3000/",
+                    "grant_type": "authorization_code"
+                },
+                "step2parameters": {
+                    "appendtourl": "true",
+                    "grant_type": "authorization_code"
+                }
+            }
+        }
+    }]
+}

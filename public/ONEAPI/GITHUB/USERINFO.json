@@ -1,0 +1,31 @@
+{
+    "commands": [{
+        "what": "OneApiService",
+        "handler": "step1",
+        "apiinfo": {
+            "oa": {
+                "appname": "applex",
+                "oauth2": "true",
+                "uid": "admin",
+                "key1": "xxxxxxxxxxxxx",
+                "key2": "xxxxxxxxxxxxxxxx",
+                "api": "github",
+                "requesttokenurl": "https://github.com/login/oauth/authorize",
+                "oauthurl": "https://github.com/login/oauth/access_token",
+                "version": "2.0",
+                "parameters": {
+                    "redirect_uri": "http://localhost:3000/",
+                    "scope": "user"
+                },
+                "callbackurl": "http://localhost:3000/",
+                "encoding": "HMAC-SHA1",
+                "step2parameters": {
+                    "redirect_uri": "http://localhost:3000/"
+                },
+                "oauth_verifier": "<%= oauth_verifier %>",
+                "finalurl": "https://api.github.com/user",
+                "finalurlmethod": "GET"
+            }
+        }
+    }]
+}

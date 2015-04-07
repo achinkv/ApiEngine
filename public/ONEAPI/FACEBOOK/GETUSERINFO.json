@@ -1,25 +1,21 @@
 {
-            "commands": [{
-                "what": "OneApiService",
-                "handler": "step1",
-                "apiinfo": {
-                    "oa": {
-                        "oauth2": "true",
-                        "requesttokenurl": "https://www.facebook.com/v2.2/dialog/oauth",
-                        "oauthurl": "https://graph.facebook.com/oauth/access_token",
-                        "key1": "xxxxxxxxxxxxxxx",
-                        "key2": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-                        "version": "2.0",
-                        "parameters": {
-                            "redirect_uri": "http://localhost:3000/",
-                            "scope": "read_stream"
-                        },
-                        "callbackurl": "http://localhost:3000/",
-                        "encoding": "HMAC-SHA1",
-                        "oauth_verifier": "<%= oauth_verifier %>",
-                        "finalurl": "https://graph.facebook.com/saurshaz",
-                        "finalurlmethod": "GET"
-                    }
+    "commands": [{
+        "what": "OneApiService",
+        "handler": "step1",
+        "apiinfo": {
+            "oa": {
+                "uid": "admin",
+                "key1": "xxxxxxxxxxxxx",
+                "key2": "xxxxxxxxxxxxxxxx",
+                "appname": "applex",
+                "api": "FACEBOOK",
+                "action": "GETUSERINFO",
+                "finalurlvariables": "saurshaz",//id of the user to find
+                "parameters": {
+                    "redirect_uri": "http://localhost:3000/",
+                    "scope": "publish_actions" //for more than one permissions comma separated permission names  can can be passed against scope.
                 }
-            }]
+            }
         }
+    }]
+}

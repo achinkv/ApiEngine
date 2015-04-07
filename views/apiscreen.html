@@ -133,7 +133,7 @@
             });
         };
 
-        var apiRequested = "/ONE_API/PROVIDER_OPERATIONS.json";
+        var apiRequested = "/ONEAPI/PROVIDER_OPERATIONS.json";
 
         ajaxify(apiRequested, function(err, res) { //fetches the provide json and puts the option in a datalist.
             var str = '';
@@ -225,7 +225,7 @@
         var apiname = $("#apiname").val();
         var operationname = $("#apiop").val();
         if (apiname && operationname) {
-            var reqUrl = "/ONE_API/" + apiname + "/" + operationname + ".json";
+            var reqUrl = "/ONEAPI/" + apiname + "/" + operationname + ".json";
 
             /*  $.ajax({
                     method: "GET",

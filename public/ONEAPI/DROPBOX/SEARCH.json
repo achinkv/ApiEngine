@@ -4,15 +4,15 @@
         "handler": "step1",
         "apiinfo": {
             "oa": {
-                "oauth2": "true",
-                "oauthurl": "https://api.dropbox.com/1/oauth2/token",
-                "requesttokenurl": "https://www.dropbox.com/1/oauth2/authorize",
+                "appname": "applex",
+                "uid": "admin",
                 "key1": "xxxxxxxxxxxxx",
                 "key2": "xxxxxxxxxxxxxxxx",
-                "version": "1.0",
-                "callbackurl": "http://localhost:3000/",
-                "encoding": "HMAC-SHA1",
-                "finalurl": "https://api.dropbox.com/1/search/auto/",
+                "api": "DROPBOX",
+                "action": "SEARCH",
+                "finalurldata": {
+                    "query": "started"
+                },
                 "parameters": {
                     "redirect_uri": "http://localhost:3000/",
                     "response_type": "code"
@@ -20,11 +20,7 @@
                 "step2parameters": {
                     "redirect_uri": "http://localhost:3000/",
                     "grant_type": "authorization_code"
-                },
-                "finalurldata": {
-                    "query": "started"
-                },
-                "finalurlmethod": "POST"
+                }
             }
         }
     }]
