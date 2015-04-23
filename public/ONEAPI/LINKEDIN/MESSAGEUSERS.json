@@ -26,7 +26,7 @@
                     "body": "Good luck for your endeavours."
 
                 },
-                "callbackurl": "http://localhost:3000"
+                "callbackurl": "http://128.199.88.224:3000"
             }
         }
     }]
