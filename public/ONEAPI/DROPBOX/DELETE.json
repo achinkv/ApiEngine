@@ -15,11 +15,11 @@
                     "path": "/hello.txt"
                 },
                 "parameters": {
-                    "redirect_uri": "http://localhost:3000/",
+                    "redirect_uri": "http://128.199.88.224:3000/",
                     "response_type": "code"
                 },
                 "step2parameters": {
-                    "redirect_uri": "http://localhost:3000/",
+                    "redirect_uri": "http://128.199.88.224:3000/",
                     "grant_type": "authorization_code"
                 }
             }

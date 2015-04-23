@@ -14,7 +14,7 @@
                     "message": "friends, what's going on"
                 },
                 "parameters": {
-                    "redirect_uri": "http://localhost:3000/",
+                    "redirect_uri": "http://128.199.88.224:3000/",
                     "scope": "publish_actions" //for more than one permissions comma separated permission names  can can be passed against scope.
                 }
             }

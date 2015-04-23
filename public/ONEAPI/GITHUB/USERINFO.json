@@ -14,13 +14,13 @@
                 "oauthurl": "https://github.com/login/oauth/access_token",
                 "version": "2.0",
                 "parameters": {
-                    "redirect_uri": "http://localhost:3000/",
+                    "redirect_uri": "http://128.199.88.224:3000/",
                     "scope": "user"
                 },
-                "callbackurl": "http://localhost:3000/",
+                "callbackurl": "http://128.199.88.224:3000/",
                 "encoding": "HMAC-SHA1",
                 "step2parameters": {
-                    "redirect_uri": "http://localhost:3000/"
+                    "redirect_uri": "http://128.199.88.224:3000/"
                 },
                 "oauth_verifier": "<%= oauth_verifier %>",
                 "finalurl": "https://api.github.com/user",

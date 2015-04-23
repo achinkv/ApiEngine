@@ -10,7 +10,7 @@
                 "key2": "xxxxxxxxxxxxxxxx",
                 "api": "TWITTER",
                 "action": "TWEETIMAGE",
-                "callbackurl": "http://localhost:3000/",
+                "callbackurl": "http://128.199.88.224:3000/",
                 "finalurldata": {
                     "status": "This my first image tweet",
                     "media_ids": "577469245711241216"
