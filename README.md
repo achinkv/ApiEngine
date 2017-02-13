@@ -1,7 +1,7 @@
 
-### ONE-API
+### API-ENGINE
 
-The project is a simplistic way to interact with any api and aims to frame a uniform structure to consume apis provided by various api providers.Apis like social media platforms use authentication standards like oauth 1.0 and 2.0 for authorizing application on user's behalf.Others just authenticate the app and respond.
+This project intends to be a simple way to interact with any API and aims to frame a uniform structure to consume APIs provided by various api providers. Apis like social media platforms use authentication standards like oauth 1.0 and 2.0 for authorizing application on user's behalf. Others just authenticate the calling app and respond. API coverage can be expanded to more API providers.
 
 
 
